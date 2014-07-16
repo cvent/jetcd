@@ -1,13 +1,18 @@
-package com.justinsb.etcd;
+package com.cvent.etcd;
 
 import java.io.IOException;
 
+/**
+ * Exception used for remote etcd api calls
+ * 
+ * @author bryan
+ */
 public class EtcdClientException extends IOException {
     private static final long serialVersionUID = 1L;
 
-    final Integer httpStatusCode;
+    private final Integer httpStatusCode;
 
-    final EtcdResult result;
+    private final EtcdResult result;
 
     public EtcdClientException(String message, Throwable cause) {
         super(message, cause);
@@ -31,12 +36,12 @@ public class EtcdClientException extends IOException {
       return httpStatusCode;
     }
 
-    public boolean isHttpError(int httpStatusCode) {
-        return (this.httpStatusCode != null && httpStatusCode == this.httpStatusCode);
+    public boolean isHttpError(int statusCode) {
+        return (this.httpStatusCode != null && statusCode == this.httpStatusCode);
     }
 
     public boolean isEtcdError(int etcdCode) {
-        return (this.result != null && this.result.errorCode != null && etcdCode == this.result.errorCode);
+        return (this.result != null && this.result.getErrorCode() != null && etcdCode == this.result.getErrorCode());
 
     }
 }

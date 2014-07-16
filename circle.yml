@@ -1,7 +1,0 @@
-dependencies:
-  pre:
-    - ./scripts/run_etcd.sh
-
-test:
-  post:
-    - mvn site -DartifactTargetPath=${CIRCLE_ARTIFACTS}
