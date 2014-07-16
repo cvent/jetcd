@@ -30,6 +30,7 @@ import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.io.Closeable;
 import org.apache.http.HttpStatus;
 
 /**
@@ -38,9 +39,9 @@ import org.apache.http.HttpStatus;
  *
  * @author bryan
  */
-public class EtcdClient {
+public class EtcdClient implements Closeable {
 
-    private static final CloseableHttpAsyncClient HTTP_CLIENT = buildDefaultHttpClient();
+    private final CloseableHttpAsyncClient httpClient;
     /**
      * The object mapper from jackson json parser which is responsible for parsing json using annotations
      */
@@ -55,14 +56,10 @@ public class EtcdClient {
             baseUri = URI.create(uri);
         }
         this.baseUri = baseUri;
-    }
-
-    private static CloseableHttpAsyncClient buildDefaultHttpClient() {
         RequestConfig requestConfig = RequestConfig.custom().build();
-        CloseableHttpAsyncClient closeableHttpAsyncClient = HttpAsyncClients.custom().setDefaultRequestConfig(
+        httpClient = HttpAsyncClients.custom().setDefaultRequestConfig(
                 requestConfig).build();
-        closeableHttpAsyncClient.start();
-        return closeableHttpAsyncClient;
+        httpClient.start();
     }
 
     /**
@@ -265,7 +262,7 @@ public class EtcdClient {
         return result;
     }
 
-    protected ListenableFuture<EtcdResult> asyncExecute(HttpUriRequest request, int[] expectedHttpStatusCodes,
+    private ListenableFuture<EtcdResult> asyncExecute(HttpUriRequest request, int[] expectedHttpStatusCodes,
             final int... expectedErrorCodes)
             throws EtcdClientException {
         ListenableFuture<JsonResponse> json = asyncExecuteJson(request, expectedHttpStatusCodes);
@@ -278,7 +275,7 @@ public class EtcdClient {
         });
     }
 
-    protected EtcdResult syncExecute(HttpUriRequest request, int[] expectedHttpStatusCodes, int... expectedErrorCodes)
+    private EtcdResult syncExecute(HttpUriRequest request, int[] expectedHttpStatusCodes, int... expectedErrorCodes)
             throws EtcdClientException {
         try {
             return asyncExecute(request, expectedHttpStatusCodes, expectedErrorCodes).get();
@@ -332,7 +329,7 @@ public class EtcdClient {
         return false;
     }
 
-    protected List<EtcdResult> syncExecuteList(HttpUriRequest request) throws EtcdClientException {
+    private List<EtcdResult> syncExecuteList(HttpUriRequest request) throws EtcdClientException {
         JsonResponse response = syncExecuteJson(request, HttpStatus.SC_OK);
         if (response.json == null) {
             return null;
@@ -373,6 +370,11 @@ public class EtcdClient {
                 return Futures.immediateFuture(json);
             }
         });
+    }
+
+    @Override
+    public void close() throws IOException {
+        httpClient.close();
     }
 
     /**
@@ -435,10 +437,10 @@ public class EtcdClient {
         return uri;
     }
 
-    protected ListenableFuture<HttpResponse> asyncExecuteHttp(HttpUriRequest request) {
+    private ListenableFuture<HttpResponse> asyncExecuteHttp(HttpUriRequest request) {
         final SettableFuture<HttpResponse> future = SettableFuture.create();
 
-        HTTP_CLIENT.execute(request, new FutureCallback<HttpResponse>() {
+        httpClient.execute(request, new FutureCallback<HttpResponse>() {
             @Override
             public void completed(HttpResponse result) {
                 future.set(result);
@@ -458,7 +460,7 @@ public class EtcdClient {
         return future;
     }
 
-    public static void close(HttpResponse response) {
+    private static void close(HttpResponse response) {
         if (response == null) {
             return;
         }
@@ -468,7 +470,7 @@ public class EtcdClient {
         }
     }
 
-    protected static String urlEscape(String s) {
+    private static String urlEscape(String s) {
         try {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
