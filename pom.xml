@@ -21,6 +21,13 @@
         <skipTests>true</skipTests>
     </properties>
 
+    <scm>
+        <connection>scm:git:git@github.com:cvent/jetcd.git</connection>
+        <developerConnection>scm:git:git@github.com:cvent/jetcd.git</developerConnection>
+        <url>http://github.com/cvent/jetcd</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
