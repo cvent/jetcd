@@ -46,12 +46,6 @@
             <version>4.3.4</version>
         </dependency>        
         <dependency>
-            <artifactId>httpcore-nio</artifactId>
-            <groupId>org.apache.httpcomponents</groupId>
-            <type>jar</type>
-            <version>4.3</version>
-        </dependency>        
-        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
             <version>4.0.1</version>
@@ -62,10 +56,6 @@
                 </exclusion>
                 <exclusion>
                     <artifactId>httpclient</artifactId>
-                    <groupId>org.apache.httpcomponents</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>httpcore-nio</artifactId>
                     <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
             </exclusions>
