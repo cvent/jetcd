@@ -70,7 +70,24 @@ public class EtcdClient implements Closeable {
      * @throws com.cvent.etcd.EtcdClientException
      */
     public EtcdResult get(String key) throws EtcdClientException {
-        URI uri = buildKeyUri("v2/keys", key, "");
+        return get(key, false);
+    }
+    
+    /**
+     * Retrieves a key. Returns null if not found.
+     *
+     * @param key
+     * @param recursive 
+     * @return
+     * @throws com.cvent.etcd.EtcdClientException
+     */
+    public EtcdResult get(String key, boolean recursive) throws EtcdClientException {
+        String suffix = "";
+        if (recursive) {
+            suffix += "?recursive=true";
+        }
+        
+        URI uri = buildKeyUri("v2/keys", key, suffix);
         HttpGet request = new HttpGet(uri);
 
         EtcdResult result = syncExecute(request, new int[]{HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND},
